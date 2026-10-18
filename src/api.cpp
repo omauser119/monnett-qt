@@ -20,11 +20,12 @@ QUrl ApiClient::baseUrl() const {
     return {};
 }
 bool ApiClient::allowedPath(const QString &p) {
-    auto lower = QUrl::fromPercentEncoding(p.toUtf8()).toLower();
-    return lower.startsWith("/api/") && !lower.contains("admin") && !lower.contains("webhook") &&
-           !lower.contains("/q/") && !lower.contains("..") && !lower.contains('?') && !lower.contains('#') &&
-           !lower.contains('\\');
+    const auto decoded = QUrl::fromPercentEncoding(p.toUtf8()).toLower();
+    const QRegularExpression excluded("^/api/(?:admin(?:/|$)|v1/(?:admin|webhook)(?:/|$)|q/)");
+    return decoded.startsWith("/api/") && !excluded.match(decoded).hasMatch() && !decoded.contains("..") &&
+           !p.contains('?') && !p.contains('#') && !decoded.contains('\\');
 }
+
 QUrl ApiClient::makeUrl(const QUrl &base, const QString &path, const QUrlQuery &q) {
     if (!allowedPath(path))
         return {};

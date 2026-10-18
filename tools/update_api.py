@@ -32,7 +32,8 @@ def main():
     for env in ['prod','dev']:
         url=f'https://api{"-dev" if env == "dev" else ""}.monnettsocial.com/openapi.json'
         raw=getattr(args,env).read_bytes() if getattr(args,env) else urllib.request.urlopen(url,timeout=45).read()
-        sources[env]=filter_spec(json.loads(raw)); provenance[env]={'url':url,'sha256':hashlib.sha256(raw).hexdigest()}
+        original=json.loads(raw); digest=original.get('x-source-sha256',hashlib.sha256(raw).hexdigest()); original['x-source-sha256']=digest
+        sources[env]=filter_spec(original); provenance[env]={'url':url,'sha256':digest}
     reverse=json.loads(args.reverse.read_text()) if args.reverse.exists() else json.loads((ROOT/'resources/reverse-client.json').read_text())
     reverse=filter_spec(reverse)
     (ROOT/'resources/reverse-client.json').write_text(json.dumps(reverse,ensure_ascii=False,indent=2)+'\n')

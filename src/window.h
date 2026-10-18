@@ -13,7 +13,7 @@ class MessagesPage;
 class Window : public QMainWindow {
     Q_OBJECT
   public:
-    explicit Window(QWidget *parent = nullptr);
+    explicit Window(QWidget *parent = nullptr, bool preview = false);
     void showPreview();
 
   private:

@@ -116,6 +116,8 @@ void Accounts::updateSession(const QString &key, const QJsonObject &s) {
 void Accounts::updateUser(const QString &key, const QJsonObject &u) {
     if (auto a = find(key)) {
         a->user = publicUser(u);
+        if (!u["email"].toString().isEmpty())
+            a->email = u["email"].toString();
         a->label = Json::text(u, {"username", "name"}, a->email);
         persist();
         emit changed();

@@ -18,7 +18,9 @@ AuthDialog::AuthDialog(Accounts *a, bool dev, QWidget *p) : QDialog(p), m_accoun
     l->addWidget(Ui::label(dev ? "api-dev.monnettsocial.com · Отдельная сессия и данные"
                                : "Ваш Monnett. На большом экране.",
                            "muted"));
-    m_api = new ApiClient(Account{.development = dev}.baseUrl(), this);
+    Account environment;
+    environment.development = dev;
+    m_api = new ApiClient(environment.baseUrl(), this);
     m_mode = new QComboBox;
     m_mode->addItems({"Войти", "Создать аккаунт", "Подтвердить email", "Восстановить пароль"});
     l->addWidget(m_mode);

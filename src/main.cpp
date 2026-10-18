@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     parser.addOption({"preview", "Показать демонстрационный интерфейс без подключения"});
     parser.addOption({"screenshot", "Сохранить снимок окна и выйти", "file"});
     parser.process(app);
-    Window window;
+    Window window(nullptr, parser.isSet("preview"));
     if (parser.isSet("preview"))
         window.showPreview();
     window.show();

@@ -61,3 +61,11 @@ class ProfileEditDialog : public QDialog {
   public:
     ProfileEditDialog(ApiClient *api, Accounts *accounts, const QString &key, QWidget *parent = nullptr);
 };
+class SecurityDialog : public QDialog {
+    Q_OBJECT
+  public:
+    SecurityDialog(ApiClient *api, Accounts *accounts, const QString &key, QWidget *parent = nullptr);
+
+  private:
+    QString m_oldEmailToken, m_newEmailToken;
+};

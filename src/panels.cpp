@@ -14,6 +14,7 @@
 #include <QPlainTextEdit>
 #include <QProgressBar>
 #include <QScrollArea>
+#include <QTabWidget>
 #include <QTimer>
 #include <QVBoxLayout>
 namespace {
@@ -534,4 +535,145 @@ ProfileEditDialog::ProfileEditDialog(ApiClient *api, Accounts *accounts, const Q
         } else
             saveProfile();
     });
+}
+SecurityDialog::SecurityDialog(ApiClient *api, Accounts *accounts, const QString &key, QWidget *p)
+    : QDialog(p) {
+    setAttribute(Qt::WA_DeleteOnClose);
+    setWindowTitle("Безопасность аккаунта");
+    resize(590, 680);
+    auto a = accounts->find(key);
+    if (!a)
+        return;
+    auto layout = new QVBoxLayout(this);
+    auto tabs = new QTabWidget;
+    layout->addWidget(tabs);
+    auto passwordPage = new QWidget;
+    auto pl = new QVBoxLayout(passwordPage);
+    auto form = new QFormLayout;
+    pl->addLayout(form);
+    auto current = new QLineEdit;
+    current->setEchoMode(QLineEdit::Password);
+    auto next = new QLineEdit;
+    next->setEchoMode(QLineEdit::Password);
+    auto repeat = new QLineEdit;
+    repeat->setEchoMode(QLineEdit::Password);
+    form->addRow("Текущий пароль", current);
+    form->addRow("Новый пароль", next);
+    form->addRow("Повторите пароль", repeat);
+    auto status = Ui::label({}, "muted");
+    pl->addWidget(status);
+    auto save = new QPushButton("Изменить пароль");
+    save->setObjectName("primary");
+    pl->addWidget(save);
+    pl->addStretch();
+    connect(save, &QPushButton::clicked, this, [=, this] {
+        if (current->text().isEmpty() || next->text().isEmpty() || next->text() != repeat->text()) {
+            status->setText("Заполните все поля. Новые пароли должны совпадать.");
+            return;
+        }
+        save->setEnabled(false);
+        api->request("POST", "/api/v1/app/user/verify-password", {},
+                     QJsonObject{{"password", current->text()}}, this, [=, this](const ApiResult &r) {
+                         if (!r.ok) {
+                             save->setEnabled(true);
+                             status->setText(r.error);
+                             return;
+                         }
+                         api->request("POST", "/api/update-password", {},
+                                      QJsonObject{{"new_password", next->text()}}, this,
+                                      [=](const ApiResult &r) {
+                                          save->setEnabled(true);
+                                          if (!r.ok) {
+                                              status->setText(r.error);
+                                              return;
+                                          }
+                                          current->clear();
+                                          next->clear();
+                                          repeat->clear();
+                                          status->setText("Пароль изменён");
+                                      });
+                     });
+    });
+    tabs->addTab(passwordPage, "Пароль");
+    auto emailPage = new QWidget;
+    auto el = new QVBoxLayout(emailPage);
+    el->addWidget(Ui::label("Подтвердите текущий и новый адрес кодами из писем.", "postText"));
+    auto es = Ui::label({}, "muted");
+    auto apply = new QPushButton("Сохранить новый email");
+    apply->setObjectName("primary");
+    apply->setEnabled(false);
+    auto oldEmail = new QLineEdit(a->email);
+    oldEmail->setReadOnly(true);
+    auto newEmail = new QLineEdit;
+    for (int i = 0; i < 2; ++i) {
+        auto email = i ? newEmail : oldEmail;
+        auto code = new QLineEdit;
+        code->setPlaceholderText("Код из письма");
+        auto section = new QFormLayout;
+        section->addRow(i ? "Новый email" : "Текущий email", email);
+        section->addRow("Код", code);
+        el->addLayout(section);
+        auto row = new QHBoxLayout;
+        el->addLayout(row);
+        row->addWidget(Ui::button("Отправить код", [=, this] {
+            if (email->text().trimmed().isEmpty()) {
+                es->setText("Введите email");
+                return;
+            }
+            api->request("POST", "/api/update-email/send-otp", {},
+                         QJsonObject{{"email", email->text().trimmed()}}, this,
+                         [es](const ApiResult &r) { es->setText(r.ok ? "Код отправлен" : r.error); });
+        }));
+        row->addWidget(Ui::button("Подтвердить код", [=, this] {
+            if (code->text().trimmed().isEmpty())
+                return;
+            api->request("POST", "/api/update-email/verify-otp", {},
+                         QJsonObject{{"email", email->text().trimmed()}, {"otp", code->text().trimmed()}},
+                         this, [=, this](const ApiResult &r) {
+                             if (!r.ok) {
+                                 es->setText(r.error);
+                                 return;
+                             }
+                             auto token =
+                                 Json::text(r.data.toObject(),
+                                            {i ? "new_email_token" : "old_email_token", "reset_token"});
+                             if (token.isEmpty()) {
+                                 es->setText("Сервер не вернул токен подтверждения");
+                                 return;
+                             }
+                             if (i)
+                                 m_newEmailToken = token;
+                             else
+                                 m_oldEmailToken = token;
+                             email->setEnabled(false);
+                             code->clear();
+                             es->setText(i ? "Новый email подтверждён" : "Текущий email подтверждён");
+                             apply->setEnabled(!m_oldEmailToken.isEmpty() && !m_newEmailToken.isEmpty());
+                         });
+        }));
+    }
+    el->addWidget(es);
+    el->addWidget(apply);
+    el->addStretch();
+    connect(apply, &QPushButton::clicked, this, [=, this] {
+        apply->setEnabled(false);
+        api->request("POST", "/api/reset-email", {},
+                     QJsonObject{{"old_email_token", m_oldEmailToken}, {"new_email_token", m_newEmailToken}},
+                     this, [=, this](const ApiResult &r) {
+                         apply->setEnabled(!r.ok);
+                         if (!r.ok) {
+                             es->setText(r.error);
+                             return;
+                         }
+                         if (auto account = accounts->find(key)) {
+                             auto user = account->user;
+                             user["email"] = newEmail->text().trimmed();
+                             accounts->updateUser(key, user);
+                         }
+                         m_oldEmailToken.clear();
+                         m_newEmailToken.clear();
+                         es->setText("Email изменён");
+                     });
+    });
+    tabs->addTab(emailPage, "Email");
 }

@@ -88,7 +88,7 @@ void play(QWidget *p, const QUrl &url) {
     player->play();
 }
 } // namespace
-Window::Window(QWidget *p) : QMainWindow(p), m_accounts(this) {
+Window::Window(QWidget *p, bool preview) : QMainWindow(p), m_accounts(this, preview) {
     setWindowTitle("Monnett — Linux");
     setWindowIcon(QIcon(":/monnett.svg"));
     resize(1280, 900);
@@ -106,14 +106,23 @@ Window::Window(QWidget *p) : QMainWindow(p), m_accounts(this) {
     sl->setSpacing(5);
     sl->addWidget(Ui::label("monnett", "brand"));
     sl->addWidget(Ui::label("YOUR PEOPLE. YOUR WORLD.", "eyebrow"));
-    sl->addSpacing(25);
+    sl->addSpacing(20);
+    auto navigation = new QWidget;
+    auto navigationLayout = new QVBoxLayout(navigation);
+    navigationLayout->setContentsMargins(0, 0, 0, 0);
+    navigationLayout->setSpacing(4);
     for (int i = 0; i < names.size(); ++i) {
         auto b = Ui::button(symbols[i] + "   " + names[i], [this, i] { navigate(i); }, sidebar, "nav");
         b->setCheckable(true);
         m_nav.append(b);
-        sl->addWidget(b);
+        navigationLayout->addWidget(b);
     }
-    sl->addStretch();
+    navigationLayout->addStretch();
+    auto navigationScroll = new QScrollArea;
+    navigationScroll->setWidgetResizable(true);
+    navigationScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    navigationScroll->setWidget(navigation);
+    sl->addWidget(navigationScroll, 1);
     sl->addWidget(Ui::label("АККАУНТЫ", "eyebrow"));
     m_sidebarAccounts = new QWidget;
     m_accountsLayout = new QVBoxLayout(m_sidebarAccounts);
@@ -122,7 +131,8 @@ Window::Window(QWidget *p) : QMainWindow(p), m_accounts(this) {
     auto ascroll = new QScrollArea;
     ascroll->setWidgetResizable(true);
     ascroll->setWidget(m_sidebarAccounts);
-    ascroll->setMaximumHeight(170);
+    ascroll->setMaximumHeight(120);
+    ascroll->setMinimumHeight(40);
     sl->addWidget(ascroll);
     auto add = new AddAccountButton;
     sl->addWidget(add);
@@ -142,7 +152,8 @@ Window::Window(QWidget *p) : QMainWindow(p), m_accounts(this) {
     text->addWidget(m_subtitle);
     top->addLayout(text, 1);
     m_environment = Ui::label("MONNETT", "badge");
-    top->addWidget(m_environment);
+    m_environment->setFixedHeight(32);
+    top->addWidget(m_environment, 0, Qt::AlignVCenter);
     top->addSpacing(12);
     top->addWidget(Ui::button("↻", [this] { refresh(); }));
     top->addWidget(Ui::button("＋  Публикация", [this] { compose(); }, main, "primary"));
