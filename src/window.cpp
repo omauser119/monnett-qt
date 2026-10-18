@@ -46,6 +46,7 @@ QString prettyTime(const QJsonObject &o) {
 QDialog *dialog(QWidget *p, const QString &title, int w = 720, int h = 680) {
     auto d = new QDialog(p);
     d->setAttribute(Qt::WA_DeleteOnClose);
+    d->setWindowModality(Qt::WindowModal);
     d->setWindowTitle(title);
     d->resize(w, h);
     return d;
@@ -217,6 +218,7 @@ void Window::addAccount(bool dev) {
 void Window::newPage(const QString &t, const QString &s) {
     Ui::clear(m_toolbar);
     if (auto old = m_scroll->takeWidget()) {
+        old->setProperty("monnettAbandoned", true);
         old->hide();
         old->deleteLater();
     }
@@ -1268,6 +1270,10 @@ void Window::settings() {
     l->addWidget(Ui::label(a->email + "\n" + a->baseUrl().toDisplayString(), "muted"));
     l->addWidget(Ui::button("Редактировать профиль", [this] { editProfile(); }, card, "primary"));
     m_content->addWidget(card);
+    m_content->addWidget(Ui::button("Безопасность: пароль и email →", [this] {
+        auto d = new SecurityDialog(api(), &m_accounts, m_accounts.activeKey(), this);
+        d->show();
+    }));
     for (auto e :
          QList<QPair<QString, QString>>{{"Правила упоминаний", "PUT /api/v1/app/mention-policy"},
                                         {"Предпочтения обзора", "PUT /api/v1/app/user/discover-preferences"},

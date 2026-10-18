@@ -25,6 +25,7 @@ QString s(const QString &id) {
 CommentsDialog::CommentsDialog(ApiClient *a, const QJsonObject &p, QWidget *parent)
     : QDialog(parent), m_api(a), m_post(Json::id(p)) {
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowModality(Qt::WindowModal);
     setWindowTitle("Комментарии");
     resize(730, 780);
     auto l = new QVBoxLayout(this);
@@ -196,6 +197,7 @@ void CommentsDialog::render(const QJsonObject &o, QVBoxLayout *target, QWidget *
 ComposeDialog::ComposeDialog(ApiClient *a, const QJsonObject &q, QWidget *p)
     : QDialog(p), m_api(a), m_quotas(q) {
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowModality(Qt::WindowModal);
     setWindowTitle("Новая публикация");
     resize(690, 780);
     auto l = new QVBoxLayout(this);
@@ -420,6 +422,7 @@ void ComposeDialog::poll() {
 ProfileEditDialog::ProfileEditDialog(ApiClient *api, Accounts *accounts, const QString &key, QWidget *p)
     : QDialog(p) {
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowModality(Qt::WindowModal);
     setWindowTitle("Редактировать профиль");
     resize(550, 650);
     auto a = accounts->find(key);
@@ -539,6 +542,7 @@ ProfileEditDialog::ProfileEditDialog(ApiClient *api, Accounts *accounts, const Q
 SecurityDialog::SecurityDialog(ApiClient *api, Accounts *accounts, const QString &key, QWidget *p)
     : QDialog(p) {
     setAttribute(Qt::WA_DeleteOnClose);
+    setWindowModality(Qt::WindowModal);
     setWindowTitle("Безопасность аккаунта");
     resize(590, 680);
     auto a = accounts->find(key);

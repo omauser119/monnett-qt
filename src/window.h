@@ -11,6 +11,7 @@ class QLabel;
 class QPushButton;
 class MessagesPage;
 class Window : public QMainWindow {
+    friend class WidgetTest;
     Q_OBJECT
   public:
     explicit Window(QWidget *parent = nullptr, bool preview = false);

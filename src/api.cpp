@@ -8,6 +8,17 @@
 #include <QRegularExpression>
 #include <QTimeZone>
 #include <utility>
+namespace {
+bool liveContext(const QPointer<QObject> &context) {
+    if (!context)
+        return false;
+    for (auto object = context.data(); object; object = object->parent())
+        if (object->property("monnettAbandoned").toBool())
+            return false;
+    return true;
+}
+} // namespace
+
 ApiClient::ApiClient(Accounts *a, const QString &key, QObject *p)
     : QObject(p), m_accounts(a), m_key(key), m_network(this) {}
 ApiClient::ApiClient(const QUrl &base, QObject *p) : QObject(p), m_base(base), m_network(this) {}
@@ -74,7 +85,7 @@ void ApiClient::request(const QByteArray &m, const QString &p, const QUrlQuery &
 }
 void ApiClient::perform(const QByteArray &m, const QString &p, const QUrlQuery &q, const QJsonValue &b,
                         QPointer<QObject> c, ApiCallback done, bool retried) {
-    if (!c)
+    if (!liveContext(c))
         return;
     auto url = makeUrl(baseUrl(), p, q);
     if (!url.isValid() || url.host().isEmpty()) {
@@ -87,7 +98,7 @@ void ApiClient::perform(const QByteArray &m, const QString &p, const QUrlQuery &
     connect(reply, &QNetworkReply::finished, this, [=, this] {
         auto r = result(reply);
         reply->deleteLater();
-        if (!c)
+        if (!liveContext(c))
             return;
         if (r.status == 401 && !retried && m_accounts && p != "/api/refresh") {
             if (auto account = m_accounts->find(m_key);
@@ -97,7 +108,7 @@ void ApiClient::perform(const QByteArray &m, const QString &p, const QUrlQuery &
                 return;
             }
             refresh([=, this](bool ok) {
-                if (!c)
+                if (!liveContext(c))
                     return;
                 if (ok)
                     perform(m, p, q, b, c, done, true);
@@ -139,7 +150,7 @@ void ApiClient::refresh(std::function<void(bool)> done) {
 }
 void ApiClient::upload(const QString &p, const QJsonObject &fields, const QStringList &files,
                        const QString &fileField, QObject *c, ApiCallback done) {
-    if (!c)
+    if (!liveContext(c))
         return;
     auto url = makeUrl(baseUrl(), p);
     if (url.isEmpty()) {
@@ -180,7 +191,7 @@ void ApiClient::upload(const QString &p, const QJsonObject &fields, const QStrin
     connect(reply, &QNetworkReply::finished, this, [reply, context, done] {
         auto r = result(reply);
         reply->deleteLater();
-        if (context)
+        if (liveContext(context))
             done(r);
     });
 }
