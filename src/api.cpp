@@ -66,6 +66,8 @@ ApiResult ApiClient::result(QNetworkReply *r) {
     ApiResult out;
     out.status = r->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     auto bytes = r->readAll();
+    out.responseBody = bytes;
+    out.contentType = r->header(QNetworkRequest::ContentTypeHeader).toString();
     QString parseError;
     out.raw = Json::parse(bytes, &parseError);
     out.data = Json::unwrap(out.raw, &out.error, &out.code);
@@ -73,9 +75,19 @@ ApiResult ApiClient::result(QNetworkReply *r) {
         r->error() == QNetworkReply::NoError && out.status >= 200 && out.status < 300 && out.error.isEmpty();
     if (!out.ok && out.error.isEmpty())
         out.error = Json::text(out.raw.toObject(), {"message", "error", "errcode"}, r->errorString());
-    if (out.ok && !parseError.isEmpty()) {
-        out.ok = false;
-        out.error = "Сервер вернул некорректный JSON: " + parseError;
+    if (!parseError.isEmpty()) {
+        if (out.contentType.contains("json", Qt::CaseInsensitive)) {
+            if (out.ok) {
+                out.ok = false;
+                out.error = "Сервер вернул некорректный JSON: " + parseError;
+            }
+        } else {
+            out.raw =
+                out.contentType.startsWith("text/")
+                    ? QJsonValue(QString::fromUtf8(bytes))
+                    : QJsonValue(QJsonObject{{"content_type", out.contentType}, {"bytes", bytes.size()}});
+            out.data = out.raw;
+        }
     }
     return out;
 }

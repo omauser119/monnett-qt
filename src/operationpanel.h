@@ -34,7 +34,8 @@ class OperationPanel : public QWidget {
     QPlainTextEdit *m_body, *m_result, *m_schema;
     QFormLayout *m_form;
     QWidget *m_formWidget;
-    QPushButton *m_run;
+    QPushButton *m_run, *m_save;
+    QByteArray m_responseBody;
     QStringList m_files;
     QString m_fileField;
 };

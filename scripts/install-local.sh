@@ -28,6 +28,9 @@ chmod +x "$install_root/bin/monnett-qt"
 install -Dm644 "$project_dir/packaging/social.monnett.MonnettQt.desktop" "$install_root/share/applications/social.monnett.MonnettQt.desktop"
 install -Dm644 "$project_dir/resources/monnett.svg" "$install_root/share/icons/hicolor/scalable/apps/social.monnett.MonnettQt.svg"
 install -Dm644 "$project_dir/LICENSE" "$app_dir/LICENSE"
+mkdir -p "$app_dir/licenses"
+cp -a "$project_dir/packaging/licenses/." "$app_dir/licenses/"
+install -Dm644 "$project_dir/packaging/THIRD_PARTY.md" "$app_dir/THIRD_PARTY.md"
 if command -v update-desktop-database >/dev/null; then
   update-desktop-database "$install_root/share/applications"
 fi

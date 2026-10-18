@@ -186,6 +186,43 @@ class CoreTest : public QObject {
         QTest::qWait(100);
         QVERIFY(!called);
     }
+
+    void nonJsonResponses() {
+        MockServer server;
+        ApiClient api(server.base());
+        server.contentType = "text/plain";
+        server.rawResponse = "hello";
+        bool done = false;
+        ApiResult result;
+        api.get("/api/hello", this, [&](const ApiResult &r) {
+            result = r;
+            done = true;
+        });
+        QTRY_VERIFY(done);
+        QVERIFY(result.ok);
+        QCOMPARE(result.data.toString(), "hello");
+        server.contentType = "image/png";
+        server.rawResponse = QByteArray::fromHex("89504e470d0a1a0a");
+        done = false;
+        api.get("/api/share/image", this, [&](const ApiResult &r) {
+            result = r;
+            done = true;
+        });
+        QTRY_VERIFY(done);
+        QVERIFY(result.ok);
+        QCOMPARE(result.responseBody, server.rawResponse);
+        QCOMPARE(result.contentType, "image/png");
+    }
+    void optionalUpdateFieldsAreOmitted() {
+        Catalogue cat;
+        const QJsonObject schema{{"type", "object"},
+                                 {"required", QJsonArray{"required"}},
+                                 {"properties", QJsonObject{{"required", QJsonObject{{"type", "string"}}},
+                                                            {"optional", QJsonObject{{"type", "boolean"}}}}}};
+        auto body = cat.example(schema, {}).toObject();
+        QVERIFY(body.contains("required"));
+        QVERIFY(!body.contains("optional"));
+    }
 };
 QTEST_GUILESS_MAIN(CoreTest)
 #include "core_test.moc"

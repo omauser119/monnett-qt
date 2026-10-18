@@ -63,7 +63,7 @@ QJsonValue Catalogue::example(const QJsonObject &schema, const QJsonObject &sche
         QJsonObject o;
         auto props = s["properties"].toObject();
         for (auto it = props.begin(); it != props.end(); ++it) {
-            if (it.value().toObject()["readOnly"].toBool())
+            if (it.value().toObject()["readOnly"].toBool() || !s["required"].toArray().contains(it.key()))
                 continue;
             o[it.key()] = example(it.value().toObject(), schemas, d + 1);
         }

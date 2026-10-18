@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QRegularExpression>
+#include <QSaveFile>
 #include <QScrollArea>
 #include <QSplitter>
 #include <QTabWidget>
@@ -41,7 +42,8 @@ OperationPanel::OperationPanel(ApiClient *a, bool dev, QWidget *p, const QString
     l->addWidget(formScroll);
     auto tabs = new QTabWidget;
     m_body = new QPlainTextEdit;
-    m_body->setPlaceholderText("JSON тела запроса. Удалите необязательные поля, которые не хотите менять.");
+    m_body->setPlaceholderText(
+        "Образец содержит обязательные поля. Дополнительные поля описаны во вкладке «Контракт».");
     m_schema = new QPlainTextEdit;
     m_schema->setReadOnly(true);
     m_result = new QPlainTextEdit;
@@ -57,6 +59,17 @@ OperationPanel::OperationPanel(ApiClient *a, bool dev, QWidget *p, const QString
     l->addWidget(file);
     m_run = Ui::button("Выполнить запрос", [this] { execute(); }, this, "primary");
     l->addWidget(m_run);
+    m_save = Ui::button("Сохранить ответ как файл…", [this] {
+        const auto path = QFileDialog::getSaveFileName(this, "Сохранить ответ");
+        if (path.isEmpty())
+            return;
+        QSaveFile file(path);
+        if (!file.open(QIODevice::WriteOnly) || file.write(m_responseBody) != m_responseBody.size() ||
+            !file.commit())
+            Ui::error(this, "Не удалось сохранить ответ");
+    });
+    m_save->setEnabled(false);
+    l->addWidget(m_save);
     m_status = Ui::label({}, "muted");
     l->addWidget(m_status);
     m_operations = m_catalogue.operations(dev);
@@ -89,12 +102,15 @@ void OperationPanel::select(int row) {
     m_fileField.clear();
     m_status->clear();
     m_result->clear();
+    m_responseBody.clear();
+    m_save->setEnabled(false);
     auto &o = m_current;
     m_description->setText(
         o.method + " " + o.path + "\n" + o.summary + "\n" +
         (o.source == "official" ? "Официальная спецификация" : "Реверс Android: legacy-контракт") + "\n" +
         o.spec["description"].toString());
-    m_schema->setPlainText(QString::fromUtf8(Json::encode(o.spec, true)));
+    m_schema->setPlainText(
+        QString::fromUtf8(Json::encode(QJsonObject{{"operation", o.spec}, {"schemas", o.schemas}}, true)));
     for (auto v : o.spec["parameters"].toArray()) {
         auto f = v.toObject();
         auto where = f["in"].toString();
@@ -181,6 +197,10 @@ void OperationPanel::execute() {
     }
     auto done = [this](const ApiResult &r) {
         m_run->setEnabled(true);
+        const bool binary =
+            !r.contentType.contains("json", Qt::CaseInsensitive) && !r.contentType.startsWith("text/");
+        m_responseBody = binary ? r.responseBody : QByteArray{};
+        m_save->setEnabled(binary && r.ok && !m_responseBody.isEmpty());
         m_status->setText(QString("HTTP %1 · ").arg(r.status) + (r.ok ? "Готово" : r.error));
         m_result->setPlainText(QString::fromUtf8(Json::encode(Json::redact(r.raw), true)));
     };

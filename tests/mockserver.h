@@ -11,6 +11,8 @@ struct Captured {
 class MockServer : public QTcpServer {
   public:
     QVector<Captured> requests;
+    QByteArray rawResponse;
+    QByteArray contentType = "application/json";
     std::function<QPair<int, QJsonValue>(const Captured &)> handler;
     MockServer() {
         connect(this, &QTcpServer::newConnection, this, [this] {
@@ -42,9 +44,9 @@ class MockServer : public QTcpServer {
                             ? handler(r)
                             : qMakePair(200, QJsonValue(QJsonObject{{"success", true},
                                                                     {"payload", QJsonObject{{"ok", true}}}}));
-                    auto bytes = Json::encode(response.second);
+                    auto bytes = rawResponse.isNull() ? Json::encode(response.second) : rawResponse;
                     socket->write("HTTP/1.1 " + QByteArray::number(response.first) +
-                                  " Status\r\nContent-Type: application/json\r\nContent-Length: " +
+                                  " Status\r\nContent-Type: " + contentType + "\r\nContent-Length: " +
                                   QByteArray::number(bytes.size()) + "\r\nConnection: close\r\n\r\n" + bytes);
                     socket->disconnectFromHost();
                     buffer->clear();

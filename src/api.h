@@ -9,6 +9,8 @@ struct ApiResult {
     int status = 0;
     QJsonValue data, raw;
     QString error, code;
+    QByteArray responseBody = {};
+    QString contentType = {};
 };
 using ApiCallback = std::function<void(const ApiResult &)>;
 class ApiClient : public QObject {
