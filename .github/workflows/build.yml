@@ -1,0 +1,28 @@
+name: Linux Qt build and tests
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  arch-linux:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    steps:
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm --needed git cmake ninja qt6-base qt6-multimedia qt6-svg qt6-imageformats libsecret libquotient python noto-fonts
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+      - name: Verify catalogue is reproducible
+        run: |
+          python tools/update_api.py --prod resources/openapi-prod.json --dev resources/openapi-dev.json --reverse resources/reverse-client.json
+          git diff --exit-code -- resources/catalogue.json docs/API_COVERAGE.md
+      - name: Smoke test and screenshot
+        run: QT_QPA_PLATFORM=offscreen XDG_CONFIG_HOME=/tmp/monnett-empty build/monnett-qt --preview --screenshot preview.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: monnett-linux-build
+          path: |
+            build/monnett-qt
+            preview.png

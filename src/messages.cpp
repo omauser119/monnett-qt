@@ -1,29 +1,305 @@
 #include "messages.h"
-#include "widgets.h"
 #include "json.h"
-#include <Quotient/connection.h>
-#include <Quotient/room.h>
-#include <Quotient/events/roommessageevent.h>
-#include <Quotient/events/encryptedevent.h>
-#include <Quotient/events/eventcontent.h>
-#include <Quotient/jobs/basejob.h>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QListWidget>
-#include <QPlainTextEdit>
-#include <QSplitter>
-#include <QInputDialog>
+#include "widgets.h"
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QMessageBox>
-#include <QTimer>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QListWidget>
 #include <QMenu>
-MessagesPage::MessagesPage(ApiClient*a,Accounts*accounts,const QString&key,QWidget*p):QWidget(p),m_api(a),m_accounts(accounts),m_key(key){setMinimumHeight(590);auto l=new QVBoxLayout(this);l->setContentsMargins(0,0,0,0);auto actions=new QHBoxLayout;actions->addWidget(Ui::button("＋ Диалог",[this]{bool ok;auto username=QInputDialog::getText(this,"Новый диалог","Username пользователя",QLineEdit::Normal,{},&ok).trimmed();if(!ok||username.isEmpty())return;if(username.startsWith('@'))username.remove(0,1);m_api->get("/api/v1/app/user/by-username/"+ApiClient::segment(username),this,[this](const ApiResult&r){if(!r.ok){m_status->setText(r.error);return;}auto u=Json::object(r.data,{"user"});startDm(Json::id(u));});}));actions->addWidget(Ui::button("Подключить заново",[this]{start();}));actions->addStretch();actions->addWidget(Ui::label("MATRIX · E2EE","badge"));l->addLayout(actions);m_status=Ui::label("Подключение к сообщениям…","muted");l->addWidget(m_status);auto split=new QSplitter;m_rooms=new QListWidget;m_rooms->setMinimumWidth(220);split->addWidget(m_rooms);auto body=new QWidget;auto b=new QVBoxLayout(body);b->setContentsMargins(10,0,0,0);b->addWidget(Ui::button("Загрузить историю",[this]{if(m_room)m_room->getPreviousContent(40);}));m_events=new QListWidget;m_events->setWordWrap(true);b->addWidget(m_events,1);m_input=new QPlainTextEdit;m_input->setPlaceholderText("Сообщение…");m_input->setMaximumHeight(85);b->addWidget(m_input);auto sendrow=new QHBoxLayout;m_attach=Ui::button("＋ Файл",[this]{attach();});m_send=Ui::button("Отправить",[this]{send();},this,"primary");m_send->setEnabled(false);m_attach->setEnabled(false);sendrow->addWidget(m_attach);sendrow->addWidget(m_send,1);b->addLayout(sendrow);split->addWidget(body);split->setSizes({230,600});l->addWidget(split,1);connect(m_rooms,&QListWidget::currentRowChanged,this,[this]{selectRoom();});m_events->setContextMenuPolicy(Qt::CustomContextMenu);connect(m_events,&QListWidget::customContextMenuRequested,this,[this](const QPoint&point){auto item=m_events->itemAt(point);if(!item||!m_room)return;auto eventId=item->data(Qt::UserRole).toString();auto pending=item->data(Qt::UserRole+1).toString();QMenu menu;if(!pending.isEmpty()){menu.addAction("Повторить отправку",[this,pending]{if(m_room)m_room->retryMessage(pending);});menu.addAction("Отменить отправку",[this,pending]{if(m_room)m_room->discardMessage(pending);});}else if(!eventId.isEmpty()){menu.addAction("Реакция ♥",[this,eventId]{if(m_room)m_room->postReaction(eventId,QString::fromUtf8("♥"));});menu.addAction("Скачать вложение…",[this,eventId]{auto file=QFileDialog::getSaveFileName(this,"Сохранить вложение");if(!file.isEmpty()&&m_room)m_room->downloadFile(eventId,QUrl::fromLocalFile(file));});menu.addAction("Удалить сообщение",[this,eventId]{if(m_room&&QMessageBox::question(this,"Удалить сообщение?","Запросить удаление сообщения из комнаты?") ==QMessageBox::Yes)m_room->redactEvent(eventId);});}menu.exec(m_events->mapToGlobal(point));});QTimer::singleShot(0,this,[this]{start();});}
-MessagesPage::~MessagesPage(){if(m_connection){m_connection->stopSync();m_connection->saveState();}}
-void MessagesPage::start(){m_send->setEnabled(false);m_attach->setEnabled(false);m_room=nullptr;if(m_connection){m_connection->stopSync();delete m_connection;}m_rooms->clear();m_events->clear();auto a=m_accounts->find(m_key);if(!a)return;auto device=a->deviceId;m_status->setText("Получение Matrix-сессии…");m_api->request("POST","/api/v1/app/msg/session",{},QJsonObject{{"deviceId",device}},this,[this](const ApiResult&r){if(!r.ok){m_status->setText(r.error);return;}auto s=r.data.toObject();auto home=QUrl(s["homeserverBaseUrl"].toString());auto token=s["accessToken"].toString();auto user=s["matrixUserId"].toString();auto device=s["deviceId"].toString();if(home.scheme()!="https"||token.isEmpty()||user.isEmpty()||device.isEmpty()){m_status->setText("Некорректная Matrix-сессия от сервера");return;}auto connection=new Quotient::Connection(home,this);m_connection=connection;connection->enableEncryption(true);connection->setCacheState(true);connect(connection,&Quotient::Connection::connected,this,[this,connection]{m_status->setText("Синхронизация шифрованных диалогов…");connection->loadState();connection->syncLoop();});connect(connection,&Quotient::Connection::syncDone,this,[this]{rooms();m_status->setText(m_room?(m_room->usesEncryption()?"Шифрованный диалог · E2EE":"Диалог без шифрования"):"Выберите диалог");if(!m_pendingDm.isEmpty()){auto id=std::exchange(m_pendingDm,{});startDm(id);}});connect(connection,&Quotient::Connection::loginError,this,[this](const QString&m,const QString&){m_status->setText("Matrix: "+m);});connect(connection,&Quotient::Connection::syncError,this,[this](const QString&m,const QString&){m_status->setText("Matrix: "+m);});connect(connection,&Quotient::Connection::requestFailed,this,[this](Quotient::BaseJob*j){m_status->setText("Matrix: "+j->errorString());});connect(connection,&Quotient::Connection::newRoom,this,[this](Quotient::Room*){rooms();});connection->assumeIdentity(user,device,token);});}
-void MessagesPage::rooms(){if(!m_connection)return;auto selected=m_room?m_room->id():QString();QSignalBlocker blocker(m_rooms);m_rooms->clear();for(auto room:m_connection->allRooms()){auto item=new QListWidgetItem((room->usesEncryption()?"▣ ":"")+room->displayName(),m_rooms);item->setData(Qt::UserRole,room->id());if(room->id()==selected)m_rooms->setCurrentItem(item);}if(m_room)timeline();}
-void MessagesPage::selectRoom(){if(m_room){disconnect(m_room,nullptr,this,nullptr);m_room->setDisplayed(false);}m_room=nullptr;auto item=m_rooms->currentItem();if(!item||!m_connection)return;m_room=m_connection->room(item->data(Qt::UserRole).toString());if(!m_room)return;m_room->setDisplayed(true);connect(m_room,&Quotient::Room::addedMessages,this,[this]{timeline();});connect(m_room,&Quotient::Room::pendingEventAdded,this,[this]{timeline();});connect(m_room,&Quotient::Room::pendingEventChanged,this,[this]{timeline();});connect(m_room,&Quotient::Room::pendingEventMerged,this,[this]{timeline();});connect(m_room,&Quotient::Room::pendingEventDiscarded,this,[this]{timeline();});connect(m_room,&Quotient::Room::replacedEvent,this,[this]{timeline();});m_send->setEnabled(true);m_attach->setEnabled(true);m_status->setText(m_room->usesEncryption()?"Шифрованный диалог · E2EE":"Диалог без шифрования");timeline();if(m_room->messageEvents().empty())m_room->getPreviousContent(40);}
-void MessagesPage::timeline(){if(!m_room)return;m_events->clear();for(const auto&item:m_room->messageEvents()){auto event=item.event();auto message=Quotient::eventCast<const Quotient::RoomMessageEvent>(event);QString text;if(message)text=message->plainBody();else if(event->matrixType()=="m.room.encrypted")text="[Шифрованное сообщение: ключ пока недоступен на этом устройстве]";else if(event->matrixType()=="m.reaction")text="Реакция: "+event->contentJson()["m.relates_to"].toObject()["key"].toString();else continue;auto line=new QListWidgetItem(event->senderId()+" · "+event->originTimestamp().toLocalTime().toString("dd MMM HH:mm")+"\n"+text,m_events);line->setData(Qt::UserRole,event->id());}for(const auto&item:m_room->pendingEvents()){auto msg=item.viewAs<Quotient::RoomMessageEvent>();auto line=new QListWidgetItem("Отправка · "+(msg?msg->plainBody():QString("Вложение")),m_events);line->setData(Qt::UserRole+1,item->transactionId());}m_events->scrollToBottom();if(!m_room->messageEvents().empty())m_room->markMessagesAsRead(m_room->messageEvents().back()->id());}
-void MessagesPage::send(){if(!m_room||m_input->toPlainText().trimmed().isEmpty())return;m_room->postText(m_input->toPlainText());m_input->clear();timeline();}
-void MessagesPage::attach(){if(!m_room)return;auto file=QFileDialog::getOpenFileName(this,"Отправить файл");if(file.isEmpty())return;m_room->postFile(QFileInfo(file).fileName(),std::make_unique<Quotient::EventContent::FileContent>(QFileInfo(file)));timeline();}
-void MessagesPage::startDm(const QString&id){if(id.isEmpty())return;if(!m_connection||!m_connection->isLoggedIn()){m_pendingDm=id;return;}m_api->request("POST","/api/v1/app/msg/dm/"+ApiClient::segment(id),{},QJsonObject{},this,[this](const ApiResult&r){if(!r.ok){m_status->setText(r.error);return;}auto roomId=r.data.toObject()["roomId"].toString();if(roomId.isEmpty()){m_status->setText("Сервер не вернул roomId");return;}m_connection->joinRoom(roomId);QTimer::singleShot(1500,this,[this,roomId]{rooms();for(int i=0;i<m_rooms->count();++i)if(m_rooms->item(i)->data(Qt::UserRole).toString()==roomId){m_rooms->setCurrentRow(i);selectRoom();break;}});});}
+#include <QMessageBox>
+#include <QPlainTextEdit>
+#include <QSplitter>
+#include <QTimer>
+#include <QVBoxLayout>
+#include <Quotient/connection.h>
+#include <Quotient/events/encryptedevent.h>
+#include <Quotient/events/eventcontent.h>
+#include <Quotient/events/roommessageevent.h>
+#include <Quotient/jobs/basejob.h>
+#include <Quotient/room.h>
+MessagesPage::MessagesPage(ApiClient *a, Accounts *accounts, const QString &key, QWidget *p)
+    : QWidget(p), m_api(a), m_accounts(accounts), m_key(key) {
+    setMinimumHeight(590);
+    auto l = new QVBoxLayout(this);
+    l->setContentsMargins(0, 0, 0, 0);
+    auto actions = new QHBoxLayout;
+    actions->addWidget(Ui::button("＋ Диалог", [this] {
+        bool ok;
+        auto username =
+            QInputDialog::getText(this, "Новый диалог", "Username пользователя", QLineEdit::Normal, {}, &ok)
+                .trimmed();
+        if (!ok || username.isEmpty())
+            return;
+        if (username.startsWith('@'))
+            username.remove(0, 1);
+        m_api->get("/api/v1/app/user/by-username/" + ApiClient::segment(username), this,
+                   [this](const ApiResult &r) {
+                       if (!r.ok) {
+                           m_status->setText(r.error);
+                           return;
+                       }
+                       auto u = Json::object(r.data, {"user"});
+                       startDm(Json::id(u));
+                   });
+    }));
+    actions->addWidget(Ui::button("Подключить заново", [this] { start(); }));
+    actions->addStretch();
+    actions->addWidget(Ui::label("MATRIX · E2EE", "badge"));
+    l->addLayout(actions);
+    m_status = Ui::label("Подключение к сообщениям…", "muted");
+    l->addWidget(m_status);
+    auto split = new QSplitter;
+    m_rooms = new QListWidget;
+    m_rooms->setMinimumWidth(220);
+    split->addWidget(m_rooms);
+    auto body = new QWidget;
+    auto b = new QVBoxLayout(body);
+    b->setContentsMargins(10, 0, 0, 0);
+    b->addWidget(Ui::button("Загрузить историю", [this] {
+        if (m_room)
+            m_room->getPreviousContent(40);
+    }));
+    m_events = new QListWidget;
+    m_events->setWordWrap(true);
+    b->addWidget(m_events, 1);
+    m_input = new QPlainTextEdit;
+    m_input->setPlaceholderText("Сообщение…");
+    m_input->setMaximumHeight(85);
+    b->addWidget(m_input);
+    auto sendrow = new QHBoxLayout;
+    m_attach = Ui::button("＋ Файл", [this] { attach(); });
+    m_send = Ui::button("Отправить", [this] { send(); }, this, "primary");
+    m_send->setEnabled(false);
+    m_attach->setEnabled(false);
+    sendrow->addWidget(m_attach);
+    sendrow->addWidget(m_send, 1);
+    b->addLayout(sendrow);
+    split->addWidget(body);
+    split->setSizes({230, 600});
+    l->addWidget(split, 1);
+    connect(m_rooms, &QListWidget::currentRowChanged, this, [this] { selectRoom(); });
+    m_events->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_events, &QListWidget::customContextMenuRequested, this, [this](const QPoint &point) {
+        auto item = m_events->itemAt(point);
+        if (!item || !m_room)
+            return;
+        auto eventId = item->data(Qt::UserRole).toString();
+        auto pending = item->data(Qt::UserRole + 1).toString();
+        QMenu menu;
+        if (!pending.isEmpty()) {
+            menu.addAction("Повторить отправку", [this, pending] {
+                if (m_room)
+                    m_room->retryMessage(pending);
+            });
+            menu.addAction("Отменить отправку", [this, pending] {
+                if (m_room)
+                    m_room->discardMessage(pending);
+            });
+        } else if (!eventId.isEmpty()) {
+            menu.addAction("Реакция ♥", [this, eventId] {
+                if (m_room)
+                    m_room->postReaction(eventId, QString::fromUtf8("♥"));
+            });
+            menu.addAction("Скачать вложение…", [this, eventId] {
+                auto file = QFileDialog::getSaveFileName(this, "Сохранить вложение");
+                if (!file.isEmpty() && m_room)
+                    m_room->downloadFile(eventId, QUrl::fromLocalFile(file));
+            });
+            menu.addAction("Удалить сообщение", [this, eventId] {
+                if (m_room &&
+                    QMessageBox::question(this, "Удалить сообщение?",
+                                          "Запросить удаление сообщения из комнаты?") == QMessageBox::Yes)
+                    m_room->redactEvent(eventId);
+            });
+        }
+        menu.exec(m_events->mapToGlobal(point));
+    });
+    QTimer::singleShot(0, this, [this] { start(); });
+}
+MessagesPage::~MessagesPage() {
+    if (m_connection) {
+        m_connection->stopSync();
+        m_connection->saveState();
+    }
+}
+void MessagesPage::start() {
+    m_send->setEnabled(false);
+    m_attach->setEnabled(false);
+    m_room = nullptr;
+    if (m_connection) {
+        m_connection->stopSync();
+        delete m_connection;
+    }
+    m_rooms->clear();
+    m_events->clear();
+    auto a = m_accounts->find(m_key);
+    if (!a)
+        return;
+    auto device = a->deviceId;
+    m_status->setText("Получение Matrix-сессии…");
+    m_api->request(
+        "POST", "/api/v1/app/msg/session", {}, QJsonObject{{"deviceId", device}}, this,
+        [this](const ApiResult &r) {
+            if (!r.ok) {
+                m_status->setText(r.error);
+                return;
+            }
+            auto s = r.data.toObject();
+            auto home = QUrl(s["homeserverBaseUrl"].toString());
+            auto token = s["accessToken"].toString();
+            auto user = s["matrixUserId"].toString();
+            auto device = s["deviceId"].toString();
+            if (home.scheme() != "https" || token.isEmpty() || user.isEmpty() || device.isEmpty()) {
+                m_status->setText("Некорректная Matrix-сессия от сервера");
+                return;
+            }
+            auto connection = new Quotient::Connection(home, this);
+            m_connection = connection;
+            connection->enableEncryption(true);
+            connection->setCacheState(true);
+            connect(connection, &Quotient::Connection::connected, this, [this, connection] {
+                m_status->setText("Синхронизация шифрованных диалогов…");
+                connection->loadState();
+                connection->syncLoop();
+            });
+            connect(connection, &Quotient::Connection::syncDone, this, [this] {
+                rooms();
+                m_status->setText(m_room ? (m_room->usesEncryption() ? "Шифрованный диалог · E2EE"
+                                                                     : "Диалог без шифрования")
+                                         : "Выберите диалог");
+                if (!m_pendingDm.isEmpty()) {
+                    auto id = std::exchange(m_pendingDm, {});
+                    startDm(id);
+                }
+            });
+            connect(connection, &Quotient::Connection::loginError, this,
+                    [this](const QString &m, const QString &) { m_status->setText("Matrix: " + m); });
+            connect(connection, &Quotient::Connection::syncError, this,
+                    [this](const QString &m, const QString &) { m_status->setText("Matrix: " + m); });
+            connect(connection, &Quotient::Connection::requestFailed, this,
+                    [this](Quotient::BaseJob *j) { m_status->setText("Matrix: " + j->errorString()); });
+            connect(connection, &Quotient::Connection::newRoom, this, [this](Quotient::Room *) { rooms(); });
+            connection->assumeIdentity(user, device, token);
+        });
+}
+void MessagesPage::rooms() {
+    if (!m_connection)
+        return;
+    auto selected = m_room ? m_room->id() : QString();
+    QSignalBlocker blocker(m_rooms);
+    m_rooms->clear();
+    for (auto room : m_connection->allRooms()) {
+        auto item = new QListWidgetItem((room->usesEncryption() ? "▣ " : "") + room->displayName(), m_rooms);
+        item->setData(Qt::UserRole, room->id());
+        if (room->id() == selected)
+            m_rooms->setCurrentItem(item);
+    }
+    if (m_room)
+        timeline();
+}
+void MessagesPage::selectRoom() {
+    if (m_room) {
+        disconnect(m_room, nullptr, this, nullptr);
+        m_room->setDisplayed(false);
+    }
+    m_room = nullptr;
+    auto item = m_rooms->currentItem();
+    if (!item || !m_connection)
+        return;
+    m_room = m_connection->room(item->data(Qt::UserRole).toString());
+    if (!m_room)
+        return;
+    m_room->setDisplayed(true);
+    connect(m_room, &Quotient::Room::addedMessages, this, [this] { timeline(); });
+    connect(m_room, &Quotient::Room::pendingEventAdded, this, [this] { timeline(); });
+    connect(m_room, &Quotient::Room::pendingEventChanged, this, [this] { timeline(); });
+    connect(m_room, &Quotient::Room::pendingEventMerged, this, [this] { timeline(); });
+    connect(m_room, &Quotient::Room::pendingEventDiscarded, this, [this] { timeline(); });
+    connect(m_room, &Quotient::Room::replacedEvent, this, [this] { timeline(); });
+    m_send->setEnabled(true);
+    m_attach->setEnabled(true);
+    m_status->setText(m_room->usesEncryption() ? "Шифрованный диалог · E2EE" : "Диалог без шифрования");
+    timeline();
+    if (m_room->messageEvents().empty())
+        m_room->getPreviousContent(40);
+}
+void MessagesPage::timeline() {
+    if (!m_room)
+        return;
+    m_events->clear();
+    for (const auto &item : m_room->messageEvents()) {
+        auto event = item.event();
+        auto message = Quotient::eventCast<const Quotient::RoomMessageEvent>(event);
+        QString text;
+        if (message)
+            text = message->plainBody();
+        else if (event->matrixType() == "m.room.encrypted")
+            text = "[Шифрованное сообщение: ключ пока недоступен на этом устройстве]";
+        else if (event->matrixType() == "m.reaction")
+            text = "Реакция: " + event->contentJson()["m.relates_to"].toObject()["key"].toString();
+        else
+            continue;
+        auto line = new QListWidgetItem(event->senderId() + " · " +
+                                            event->originTimestamp().toLocalTime().toString("dd MMM HH:mm") +
+                                            "\n" + text,
+                                        m_events);
+        line->setData(Qt::UserRole, event->id());
+    }
+    for (const auto &item : m_room->pendingEvents()) {
+        auto msg = item.viewAs<Quotient::RoomMessageEvent>();
+        auto line =
+            new QListWidgetItem("Отправка · " + (msg ? msg->plainBody() : QString("Вложение")), m_events);
+        line->setData(Qt::UserRole + 1, item->transactionId());
+    }
+    m_events->scrollToBottom();
+    if (!m_room->messageEvents().empty())
+        m_room->markMessagesAsRead(m_room->messageEvents().back()->id());
+}
+void MessagesPage::send() {
+    if (!m_room || m_input->toPlainText().trimmed().isEmpty())
+        return;
+    m_room->postText(m_input->toPlainText());
+    m_input->clear();
+    timeline();
+}
+void MessagesPage::attach() {
+    if (!m_room)
+        return;
+    auto file = QFileDialog::getOpenFileName(this, "Отправить файл");
+    if (file.isEmpty())
+        return;
+    m_room->postFile(QFileInfo(file).fileName(),
+                     std::make_unique<Quotient::EventContent::FileContent>(QFileInfo(file)));
+    timeline();
+}
+void MessagesPage::startDm(const QString &id) {
+    if (id.isEmpty())
+        return;
+    if (!m_connection || !m_connection->isLoggedIn()) {
+        m_pendingDm = id;
+        return;
+    }
+    m_api->request("POST", "/api/v1/app/msg/dm/" + ApiClient::segment(id), {}, QJsonObject{}, this,
+                   [this](const ApiResult &r) {
+                       if (!r.ok) {
+                           m_status->setText(r.error);
+                           return;
+                       }
+                       auto roomId = r.data.toObject()["roomId"].toString();
+                       if (roomId.isEmpty()) {
+                           m_status->setText("Сервер не вернул roomId");
+                           return;
+                       }
+                       m_connection->joinRoom(roomId);
+                       QTimer::singleShot(1500, this, [this, roomId] {
+                           rooms();
+                           for (int i = 0; i < m_rooms->count(); ++i)
+                               if (m_rooms->item(i)->data(Qt::UserRole).toString() == roomId) {
+                                   m_rooms->setCurrentRow(i);
+                                   selectRoom();
+                                   break;
+                               }
+                       });
+                   });
+}

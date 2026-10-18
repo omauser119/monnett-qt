@@ -1,7 +1,7 @@
 #pragma once
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QStringList>
 namespace Json {
 QByteArray encode(const QJsonValue &value, bool pretty = false);
@@ -13,4 +13,4 @@ QJsonArray list(const QJsonValue &value, const QStringList &keys = {});
 QJsonArray posts(const QJsonValue &value);
 QJsonObject object(const QJsonValue &value, const QStringList &keys = {});
 QJsonValue redact(const QJsonValue &value);
-}
+} // namespace Json

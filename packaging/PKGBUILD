@@ -1,0 +1,22 @@
+pkgname=monnett-qt
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Independent red-and-black Monnett social client for Linux'
+arch=('x86_64' 'aarch64')
+url='https://github.com/omauser119/monnett-qt'
+license=('MIT')
+depends=('qt6-base' 'qt6-multimedia' 'qt6-svg' 'qt6-imageformats' 'libsecret' 'libquotient')
+makedepends=('cmake' 'ninja' 'git')
+source=("git+https://github.com/omauser119/monnett-qt.git#tag=v$pkgver")
+sha256sums=('SKIP')
+build() {
+  cmake -S "$srcdir/$pkgname" -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+  cmake --build build
+}
+check() {
+  QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure
+}
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+  install -Dm644 "$srcdir/$pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
