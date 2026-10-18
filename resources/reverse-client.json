@@ -1,0 +1,3678 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Monnett API recovered from Android 1.5.0 build 107",
+    "version": "1.5.0-reverse.1",
+    "description": "Статический клиентский контракт. Не официальная спецификация. Серверные required поля и endpoint-specific status codes не установлены. См. guide.md; responses описаны после unwrap кроме legacy. Примеры синтетические."
+  },
+  "servers": [
+    {
+      "url": "https://api.monnettsocial.com/api",
+      "description": "Production constant"
+    },
+    {
+      "url": "https://api-dev.monnettsocial.com/api",
+      "description": "Development constant"
+    },
+    {
+      "url": "http://localhost:1338/api",
+      "description": "Local constant"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op001_register",
+        "summary": "register",
+        "description": "Объект с success; JWT сохраняется после подтверждения OTP. Клиент отправляет пустое name и tos_accepted=true. Формат даты рождения см. раздел сценариев.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 1175,
+          "address": "0xc8a4c0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект с success; JWT сохраняется после подтверждения OTP. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "security": [],
+        "x-client-path-template": "/auth/register",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "date_of_birth": {
+                    "type": "string"
+                  },
+                  "tos_accepted": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op002_login",
+        "summary": "login",
+        "description": "AuthSession: user, jwt, refresh_token? ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 721,
+          "address": "0xc755f0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: AuthSession: user, jwt, refresh_token? HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "security": [],
+        "x-client-path-template": "/auth/login",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/send-otp": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op003__sendOtp",
+        "summary": "_sendOtp",
+        "description": "Объект; поля не фиксированы клиентом. type=register или reset-password. Обёртки sendOtpForRegistration/sendOtpForPasswordReset используют один маршрут.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 90,
+          "address": "0xb6fffc"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "security": [],
+        "x-client-path-template": "/send-otp",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "register",
+                      "reset-password"
+                    ]
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify-otp": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op004__verifyOtp",
+        "summary": "_verifyOtp",
+        "description": "При register: user, jwt, refresh_token?; при reset-password: reset_token. type=register или reset-password.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 873,
+          "address": "0xc856b4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: При register: user, jwt, refresh_token?; при reset-password: reset_token. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "security": [],
+        "x-client-path-template": "/verify-otp",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "otp": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "register",
+                      "reset-password"
+                    ]
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/refresh": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op005__handleTokenRefresh",
+        "summary": "_handleTokenRefresh",
+        "description": "HTTP 200 + success=true, payload.jwt и payload.refresh_token?. Dio получает сохранённый refresh token непосредственно как data (String), без JSON-объекта refresh_token. Точные байты тела требуют сетевой проверки; не подменять это предположением о JSON-объекте.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_interceptor.dart",
+          "line": 985,
+          "address": "0xda8da8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: HTTP 200 + success=true, payload.jwt и payload.refresh_token?. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "security": [],
+        "x-client-path-template": "/refresh",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "description": "Client passes raw refresh-token string to Dio.data, without wrapping in a map. Exact wire encoding not captured."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/validate": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op006__handleTokenValidation",
+        "summary": "_handleTokenValidation",
+        "description": "HTTP 200 + success=true; payload.jwt, payload.refresh_token? могут обновляться. С Bearer JWT, без тела. Прямой вызов Dio, минуя _handleResponse.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_interceptor.dart",
+          "line": 1490,
+          "address": "0xda9960"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: HTTP 200 + success=true; payload.jwt, payload.refresh_token? могут обновляться. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/validate"
+      }
+    },
+    "/reset-password": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op007_finalizePasswordReset",
+        "summary": "finalizePasswordReset",
+        "description": "Объект; поля не фиксированы клиентом. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 961,
+          "address": "0xc86684"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "security": [],
+        "x-client-path-template": "/reset-password",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reset_token": {
+                    "type": "string"
+                  },
+                  "new_password": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op008_getCurrentUser",
+        "summary": "getCurrentUser",
+        "description": "{user: UserApiModel} ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 10,
+          "address": "0x809b00"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {user: UserApiModel} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/user"
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op009_logout",
+        "summary": "logout",
+        "description": "Ответ игнорируется; локальная сессия очищается. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 1281,
+          "address": "0xd17a2c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется; локальная сессия очищается. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/logout"
+      }
+    },
+    "/check-username": {
+      "get": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op010_checkUsername",
+        "summary": "checkUsername",
+        "description": "{available: boolean} В клиенте query собран интерполяцией. Сам маршрут не входит в список unauthenticatedEndpoints.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 1110,
+          "address": "0xc88ba0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {available: boolean} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/check-username"
+      }
+    },
+    "/username": {
+      "put": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op011_updateUsername",
+        "summary": "updateUsername",
+        "description": "Объект; поля не фиксированы клиентом. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 1040,
+          "address": "0xc8856c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/username",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify-password": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op012_verifyPassword",
+        "summary": "verifyPassword",
+        "description": "Объект; поля не фиксированы клиентом. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 529,
+          "address": "0xc637ac"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/verify-password",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/update-password": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op013_updatePassword",
+        "summary": "updatePassword",
+        "description": "Объект; поля не фиксированы клиентом. В UI сначала проверяется текущий пароль через /verify-password. В это тело текущий пароль не включён.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 459,
+          "address": "0xc63010"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/update-password",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "new_password": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/update-email/send-otp": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op014_sendOtpForEmailUpdate",
+        "summary": "sendOtpForEmailUpdate",
+        "description": "Объект; поля не фиксированы клиентом. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 388,
+          "address": "0xc617ac"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/update-email/send-otp",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/update-email/verify-otp": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op015_verifyOtpForEmailUpdate",
+        "summary": "verifyOtpForEmailUpdate",
+        "description": "reset_token либо old_email_token либо new_email_token; клиент принимает эти варианты. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 240,
+          "address": "0xc60ce0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: reset_token либо old_email_token либо new_email_token; клиент принимает эти варианты. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/update-email/verify-otp",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "otp": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reset-email": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op016_finalizeEmailReset",
+        "summary": "finalizeEmailReset",
+        "description": "Ответ игнорируется. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 320,
+          "address": "0xc6124c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/reset-email",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "old_email_token": {
+                    "type": "string"
+                  },
+                  "new_email_token": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/delete-account": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op017_deleteAccount",
+        "summary": "deleteAccount",
+        "description": "Объект; поля не фиксированы клиентом. Удаление аккаунта.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 169,
+          "address": "0xc5ef60"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/delete-account",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accept-tos": {
+      "put": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op018_acceptTos",
+        "summary": "acceptTos",
+        "description": "Объект; поля не фиксированы клиентом. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 600,
+          "address": "0xc73da4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/accept-tos"
+      }
+    },
+    "/accept-marketing": {
+      "put": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op019_acceptMarketing",
+        "summary": "acceptMarketing",
+        "description": "Объект; поля не фиксированы клиентом. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 649,
+          "address": "0xc740bc"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/accept-marketing",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "marketing_opt_in": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/user/onboarded/{surface}": {
+      "post": {
+        "tags": [
+          "Авторизация"
+        ],
+        "operationId": "op020_markOnboarded",
+        "summary": "markOnboarded",
+        "description": "Объект; поля не фиксированы клиентом. surface=discover|home|create; это строка из OnboardingSurface.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/auth_api_service.dart",
+          "line": 801,
+          "address": "0xc83ce4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект; поля не фиксированы клиентом. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "surface",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "discover",
+                "home",
+                "create"
+              ]
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/user/onboarded/{surface}"
+      }
+    },
+    "/profile/{userId}": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op021_fetchProfile",
+        "summary": "fetchProfile",
+        "description": "ProfileFullApiModel ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 382,
+          "address": "0x795ccc"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: ProfileFullApiModel HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/profile/{userId}"
+      }
+    },
+    "/profile": {
+      "put": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op022_putProfile",
+        "summary": "putProfile",
+        "description": "Ответ игнорируется. Частичное обновление: состав body зависит от экрана. Поля описаны в разделе профиля.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 441,
+          "address": "0xba18e4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/profile",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/profile/bio": {
+      "put": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op023_updateBio",
+        "summary": "updateBio",
+        "description": "{bio_mentions: Mention[]} или {bioMentions: Mention[]} mentions содержит user_public_id, start, end.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 599,
+          "address": "0xd128b4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {bio_mentions: Mention[]} или {bioMentions: Mention[]} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/profile/bio",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bio": {
+                    "type": "string"
+                  },
+                  "mentions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SelectedMention"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/followers/{userId}": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op024_fetchFollowers",
+        "summary": "fetchFollowers",
+        "description": "Page<Profile>, список в data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 196,
+          "address": "0x78faa4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<Profile>, список в data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/followers/{userId}"
+      }
+    },
+    "/following/{userId}": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op025_fetchFollowing",
+        "summary": "fetchFollowing",
+        "description": "Page<Profile>, список в data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 103,
+          "address": "0x78e3dc"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<Profile>, список в data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/following/{userId}"
+      }
+    },
+    "/mutual-friends/{userId}": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op026_fetchMutualFriends",
+        "summary": "fetchMutualFriends",
+        "description": "Page<Profile>, список в data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 10,
+          "address": "0x763940"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<Profile>, список в data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/mutual-friends/{userId}"
+      }
+    },
+    "/all-friends/{userId}": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op027_fetchAllFriends",
+        "summary": "fetchAllFriends",
+        "description": "Page<Profile>, список в data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 475,
+          "address": "0xc7d278"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<Profile>, список в data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/all-friends/{userId}"
+      }
+    },
+    "/users/{userId}/posts": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op028_fetchUserPosts",
+        "summary": "fetchUserPosts",
+        "description": "Page<MediaPost>, список в data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/profile_api_client.dart",
+          "line": 289,
+          "address": "0x790e20"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<MediaPost>, список в data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/users/{userId}/posts"
+      }
+    },
+    "/v1/app/user/by-username/{username}": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op029_getByUsername",
+        "summary": "getByUsername",
+        "description": "PublicUserDto: id:int, publicId:string, username:string, display_name:string? username URL-encoded через Uri.encodeComponent.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/user_api_client.dart",
+          "line": 176,
+          "address": "0xa8d9c4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: PublicUserDto: id:int, publicId:string, username:string, display_name:string? HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/user/by-username/{username}"
+      }
+    },
+    "/get-avatar-ring-colors": {
+      "get": {
+        "tags": [
+          "Профили"
+        ],
+        "operationId": "op030_getAvatarRingColors",
+        "summary": "getAvatarRingColors",
+        "description": "{avatarRingColors: AvatarRingColor[]} ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/misc_api_client.dart",
+          "line": 10,
+          "address": "0xad224c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {avatarRingColors: AvatarRingColor[]} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/get-avatar-ring-colors"
+      }
+    },
+    "/follow": {
+      "post": {
+        "tags": [
+          "Подписки на людей"
+        ],
+        "operationId": "op031_follow",
+        "summary": "follow",
+        "description": "RelationshipStatus follow() и unfollow() отправляют одинаковый POST: переключение состояния. Не является идемпотентным set-follow=true.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/follow_api_client.dart",
+          "line": 221,
+          "address": "0xbb0b4c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: RelationshipStatus HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/follow",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "subjectId": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/follow/requests": {
+      "get": {
+        "tags": [
+          "Подписки на людей"
+        ],
+        "operationId": "op032_fetchFollowRequests",
+        "summary": "fetchFollowRequests",
+        "description": "FollowRequestDto[] после unwrap, без дополнительной обязательной вложенности data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/follow_api_client.dart",
+          "line": 10,
+          "address": "0xafd948"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: FollowRequestDto[] после unwrap, без дополнительной обязательной вложенности data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/follow/requests"
+      }
+    },
+    "/follow/manage-request": {
+      "post": {
+        "tags": [
+          "Подписки на людей"
+        ],
+        "operationId": "op033_manageFollowRequest",
+        "summary": "manageFollowRequest",
+        "description": "Ответ игнорируется. action=ACCEPT или REJECT.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/follow_api_client.dart",
+          "line": 145,
+          "address": "0xbac164"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/follow/manage-request",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "requestId": {
+                    "type": "integer"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "ACCEPT",
+                      "REJECT"
+                    ]
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/follow-request/{requestId}": {
+      "delete": {
+        "tags": [
+          "Подписки на людей"
+        ],
+        "operationId": "op034_cancelFollowRequest",
+        "summary": "cancelFollowRequest",
+        "description": "Ответ игнорируется. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/follow_api_client.dart",
+          "line": 304,
+          "address": "0xbb17ec"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/follow-request/{requestId}"
+      }
+    },
+    "/blocked-users": {
+      "get": {
+        "tags": [
+          "Блокировки"
+        ],
+        "operationId": "op035_fetchBlockedUsers",
+        "summary": "fetchBlockedUsers",
+        "description": "{data: BlockedUserApiModel[]} ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/block_api_client.dart",
+          "line": 10,
+          "address": "0xa8f39c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {data: BlockedUserApiModel[]} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/blocked-users"
+      }
+    },
+    "/check-blocked": {
+      "post": {
+        "tags": [
+          "Блокировки"
+        ],
+        "operationId": "op036_checkBlocked",
+        "summary": "checkBlocked",
+        "description": "BlockStatusApiModel: blocked, i_blocked, blocked_me; клиент допускает вложенность data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/block_api_client.dart",
+          "line": 90,
+          "address": "0xbb1f18"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: BlockStatusApiModel: blocked, i_blocked, blocked_me; клиент допускает вложенность data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/check-blocked",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/block": {
+      "post": {
+        "tags": [
+          "Блокировки"
+        ],
+        "operationId": "op037_toggleBlock",
+        "summary": "toggleBlock",
+        "description": "{blocked:boolean} Переключение блокировки; повторный вызов не эквивалентен идемпотентной установке.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/block_api_client.dart",
+          "line": 196,
+          "address": "0xbb318c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {blocked:boolean} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/block",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id_to_block": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/feed": {
+      "get": {
+        "tags": [
+          "Лента"
+        ],
+        "operationId": "op038_getFeed",
+        "summary": "getFeed",
+        "description": "{timeline: TimelinePeriod[], meta: {pagination: PaginationMeta}} Клиент отправляет limit=60 и заголовок X-Timezone с именем часового пояса устройства.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/feed_api_service.dart",
+          "line": 10,
+          "address": "0xacec04"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {timeline: TimelinePeriod[], meta: {pagination: PaginationMeta}} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "header",
+            "name": "X-Timezone",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/feed"
+      }
+    },
+    "/v1/app/feed/discover": {
+      "get": {
+        "tags": [
+          "Лента"
+        ],
+        "operationId": "op039_getScopedDiscoverFeed",
+        "summary": "getScopedDiscoverFeed",
+        "description": "DiscoverFeedResponse: items[], next_cursor. startScope=CITY|COUNTRY|GLOBAL; limit=30 в этом клиенте. members_only добавляется только при true. Курсор непрозрачный.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/feed_api_service.dart",
+          "line": 125,
+          "address": "0xae2de8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: DiscoverFeedResponse: items[], next_cursor. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "startScope",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CITY",
+                "COUNTRY",
+                "GLOBAL"
+              ]
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "includeUnlocated",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "members_only",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/v1/app/feed/discover"
+      }
+    },
+    "/v1/app/user/discover-preferences": {
+      "get": {
+        "tags": [
+          "Лента"
+        ],
+        "operationId": "op040_getDiscoverPreferences",
+        "summary": "getDiscoverPreferences",
+        "description": "default_scope, anchor_city, anchor_country, include_unlocated. PUT в этой версии не отправляет include_unlocated; отсутствие anchor и пустое значение не следует считать равнозначными.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/user_settings_api_service.dart",
+          "line": 166,
+          "address": "0xacd2f8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: default_scope, anchor_city, anchor_country, include_unlocated. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/user/discover-preferences"
+      },
+      "put": {
+        "tags": [
+          "Лента"
+        ],
+        "operationId": "op041_updateDiscoverPreferences",
+        "summary": "updateDiscoverPreferences",
+        "description": "default_scope, anchor_city, anchor_country, include_unlocated. PUT в этой версии не отправляет include_unlocated; отсутствие anchor и пустое значение не следует считать равнозначными.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/user_settings_api_service.dart",
+          "line": 10,
+          "address": "0xacce8c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: default_scope, anchor_city, anchor_country, include_unlocated. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/user/discover-preferences",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "default_scope": {
+                    "type": "string"
+                  },
+                  "anchor_city": {
+                    "type": "string"
+                  },
+                  "anchor_country": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/algorithm-control": {
+      "get": {
+        "tags": [
+          "Лента"
+        ],
+        "operationId": "op042_getCategories",
+        "summary": "getCategories",
+        "description": "{categories_entry: AlgorithmCategoryDto[]} ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/algorithm_api_client.dart",
+          "line": 227,
+          "address": "0xb6a7ec"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {categories_entry: AlgorithmCategoryDto[]} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/algorithm-control"
+      },
+      "put": {
+        "tags": [
+          "Лента"
+        ],
+        "operationId": "op043_setCategoriesEnabled",
+        "summary": "setCategoriesEnabled",
+        "description": "Ответ игнорируется. Элемент: {category:{id:int}, weight:number}. weight=100 для true, 0 для false.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/algorithm_api_client.dart",
+          "line": 10,
+          "address": "0x9e566c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/algorithm-control",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categories_entry": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "category": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            }
+                          },
+                          "additionalProperties": true
+                        },
+                        "weight": {
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": [
+          "Лента"
+        ],
+        "operationId": "op044_fetchCategories",
+        "summary": "fetchCategories",
+        "description": "Массив Category, напрямую из HTTP JSON. Старый HTTP-клиент, отдельный разбор ответа.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/category_service.dart",
+          "line": 10,
+          "address": "0xacd528"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Массив Category, напрямую из HTTP JSON. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/categories"
+      }
+    },
+    "/v1/app/location/reverse": {
+      "get": {
+        "tags": [
+          "Локации"
+        ],
+        "operationId": "op045_reverse",
+        "summary": "reverse",
+        "description": "Объект адреса: address, zip, city, country. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/location_api_service.dart",
+          "line": 10,
+          "address": "0xae4034"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Объект адреса: address, zip, city, country. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lat",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "lng",
+            "schema": {
+              "type": "number"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/v1/app/location/reverse"
+      }
+    },
+    "/search": {
+      "get": {
+        "tags": [
+          "Поиск и упоминания"
+        ],
+        "operationId": "op046_search",
+        "summary": "search",
+        "description": "Page<MediaPost> или Page<SearchAccountApiModel>, список в data. type=accounts|posts.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/search_api_client.dart",
+          "line": 87,
+          "address": "0xa67744"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<MediaPost> или Page<SearchAccountApiModel>, список в data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "keyword",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "accounts",
+                "posts"
+              ]
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/search"
+      }
+    },
+    "/v1/app/search/posts-by-tag": {
+      "get": {
+        "tags": [
+          "Поиск и упоминания"
+        ],
+        "operationId": "op047_searchPostsByTag",
+        "summary": "searchPostsByTag",
+        "description": "Посты в posts; meta.pagination. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/search_api_client.dart",
+          "line": 10,
+          "address": "0xa67484"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Посты в posts; meta.pagination. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tag",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/v1/app/search/posts-by-tag"
+      }
+    },
+    "/v1/app/users/mentionable": {
+      "get": {
+        "tags": [
+          "Поиск и упоминания"
+        ],
+        "operationId": "op048_getMentionableUsers",
+        "summary": "getMentionableUsers",
+        "description": "Page<MinimalUserDto>; клиент принимает data или items. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/mention_api_client.dart",
+          "line": 10,
+          "address": "0xa64400"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<MinimalUserDto>; клиент принимает data или items. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/v1/app/users/mentionable"
+      }
+    },
+    "/get-users-to-mention": {
+      "get": {
+        "tags": [
+          "Поиск и упоминания"
+        ],
+        "operationId": "op049_getUsersToTag",
+        "summary": "getUsersToTag",
+        "description": "Page<MinimalUserDto>; список в users. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/mention_api_client.dart",
+          "line": 196,
+          "address": "0xa64ca8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<MinimalUserDto>; список в users. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pagination_size",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/get-users-to-mention"
+      }
+    },
+    "/v1/app/mention-policy": {
+      "get": {
+        "tags": [
+          "Поиск и упоминания"
+        ],
+        "operationId": "op050_getPolicy",
+        "summary": "getPolicy",
+        "description": "{policy:string}; parser также принимает level. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/mention_api_client.dart",
+          "line": 273,
+          "address": "0xd19084"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {policy:string}; parser также принимает level. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/mention-policy"
+      },
+      "put": {
+        "tags": [
+          "Поиск и упоминания"
+        ],
+        "operationId": "op051_updatePolicy",
+        "summary": "updatePolicy",
+        "description": "MentionPolicy ANYONE|FOLLOWING|FRIENDS|NO_ONE.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/mention_api_client.dart",
+          "line": 312,
+          "address": "0xd19cfc"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MentionPolicy HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/mention-policy",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "policy": {
+                    "type": "string",
+                    "enum": [
+                      "ANYONE",
+                      "FOLLOWING",
+                      "FRIENDS",
+                      "NO_ONE"
+                    ]
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/post/create": {
+      "post": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op052_createPost",
+        "summary": "createPost",
+        "description": "CreatePostResult: postId или post_id. Сначала создаётся запись с media_count, затем медиа загружаются отдельно.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 818,
+          "address": "0xc4938c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: CreatePostResult: postId или post_id. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/post/create",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostCreate"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/post/{postId}": {
+      "get": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op053_getByPublicId",
+        "summary": "getByPublicId",
+        "description": "MediaPost; для истории этот же путь использует StoryApiService. publicId кодируется Uri.encodeComponent. Client path parameter semantics: /v1/app/post/{publicId}",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 540,
+          "address": "0xa8d708"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MediaPost; для истории этот же путь использует StoryApiService. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/post/{publicId}"
+      },
+      "put": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op055_updatePost",
+        "summary": "updatePost",
+        "description": "MediaPost Состав тела определяет MediaPost.toUpdateJson.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 755,
+          "address": "0xc45df0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MediaPost HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/post/{postId}",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostUpdate"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op056_deletePost",
+        "summary": "deletePost",
+        "description": "Ответ игнорируется. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 599,
+          "address": "0xc11bd0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/post/{postId}"
+      }
+    },
+    "/v1/app/post/by-comment/{commentId}": {
+      "get": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op054_getByCommentId",
+        "summary": "getByCommentId",
+        "description": "MediaPost Сегмент commentId URL-encoded; тип передаваемого идентификатора не следует автоматически приравнивать к numeric id.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 481,
+          "address": "0xa8c1dc"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MediaPost HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/post/by-comment/{commentId}"
+      }
+    },
+    "/v1/app/posts/{postId}/like": {
+      "post": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op057_likePost",
+        "summary": "likePost",
+        "description": "LikeDto: liked:boolean, likeCount:int ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 696,
+          "address": "0xc1b72c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: LikeDto: liked:boolean, likeCount:int HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/posts/{postId}/like"
+      },
+      "delete": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op058_unlikePost",
+        "summary": "unlikePost",
+        "description": "LikeDto: liked:boolean, likeCount:int ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 639,
+          "address": "0xc1b3d4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: LikeDto: liked:boolean, likeCount:int HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/posts/{postId}/like"
+      }
+    },
+    "/v1/app/post/status": {
+      "get": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op059_getPostsStatus",
+        "summary": "getPostsStatus",
+        "description": "PostBackendStatus[] либо одиночный PostBackendStatus. При пустом ids клиент возвращает [] без HTTP. Передаётся список, а не строка CSV; сериализация Dio описана отдельно.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 300,
+          "address": "0x7bd66c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: PostBackendStatus[] либо одиночный PostBackendStatus. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ids",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены.",
+            "style": "form",
+            "explode": true
+          }
+        ],
+        "x-client-path-template": "/v1/app/post/status"
+      }
+    },
+    "/posts/{postId}": {
+      "get": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op062_fetchPostById",
+        "summary": "fetchPostById",
+        "description": "MediaPost из JSON напрямую. Старый HTTP-клиент.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/feed_service.dart",
+          "line": 10,
+          "address": "0xac9c08"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MediaPost из JSON напрямую. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/posts/{postId}"
+      },
+      "delete": {
+        "tags": [
+          "Истории"
+        ],
+        "operationId": "op070_deleteStory",
+        "summary": "deleteStory",
+        "description": "Ответ игнорируется.  Client path parameter semantics: /posts/{storyId}",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/story_api_service.dart",
+          "line": 322,
+          "address": "0xbabad0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/posts/{storyId}"
+      }
+    },
+    "/{postId}/likes": {
+      "get": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op063_fetchLikes",
+        "summary": "fetchLikes",
+        "description": "Profile[] напрямую. При HTTP 404 или 405 клиент повторяет GET /posts/{postId}/likes.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/feed_service.dart",
+          "line": 590,
+          "address": "0xb605b8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Profile[] напрямую. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/{postId}/likes"
+      }
+    },
+    "/posts/{postId}/likes": {
+      "get": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op064_fetchLikes",
+        "summary": "fetchLikes",
+        "description": "Profile[] напрямую. Резервный маршрут для /{postId}/likes при 404/405.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/feed_service.dart",
+          "line": 590,
+          "address": "0xb605b8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Profile[] напрямую. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/posts/{postId}/likes"
+      }
+    },
+    "/posts": {
+      "post": {
+        "tags": [
+          "Посты"
+        ],
+        "operationId": "op065_repostPost",
+        "summary": "repostPost",
+        "description": "MediaPost напрямую. Старый endpoint репоста. post_type=\"post\" здесь отличается от нового создания media/story/text.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/share_service.dart",
+          "line": 10,
+          "address": "0xc22b10"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MediaPost напрямую. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/posts",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "post_type": {
+                    "type": "string"
+                  },
+                  "repost_of": {
+                    "type": "integer"
+                  },
+                  "repost_caption": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/media/upload": {
+      "post": {
+        "tags": [
+          "Медиа"
+        ],
+        "operationId": "op060_uploadMedia",
+        "summary": "uploadMedia",
+        "description": "Ответ вызывающий код игнорирует. multipart/form-data: file, mediaIndex:int, postId?:string. Отправка и получение имеют timeout 300 секунд.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/post_api_client.dart",
+          "line": 374,
+          "address": "0x7c3310"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ вызывающий код игнорирует. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/media/upload",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "mediaIndex": {
+                    "type": "integer"
+                  },
+                  "postId": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload": {
+      "post": {
+        "tags": [
+          "Медиа"
+        ],
+        "operationId": "op061__performUpload",
+        "summary": "_performUpload",
+        "description": "HTTP 200/201: массив объектов с id; клиент преобразует id в строки. multipart/form-data, повторяющееся поле files. Используется в том числе для профиля; не смешивать с новым upload.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/media_service.dart",
+          "line": 686,
+          "address": "0xc67500"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: HTTP 200/201: массив объектов с id; клиент преобразует id в строки. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/upload",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/stories": {
+      "get": {
+        "tags": [
+          "Истории"
+        ],
+        "operationId": "op066_getStories",
+        "summary": "getStories",
+        "description": "StoriesResponse: users, current_user, meta.pagination, last_seen_story_id. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/story_api_service.dart",
+          "line": 64,
+          "address": "0xad1bd8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: StoriesResponse: users, current_user, meta.pagination, last_seen_story_id. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/v1/app/stories"
+      }
+    },
+    "/v1/app/users/{userId}/stories": {
+      "get": {
+        "tags": [
+          "Истории"
+        ],
+        "operationId": "op067_getUserStories",
+        "summary": "getUserStories",
+        "description": "StoryGroup: профиль пользователя, stories, has_unseen, ring_colors. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/story_api_service.dart",
+          "line": 151,
+          "address": "0xad35d0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: StoryGroup: профиль пользователя, stories, has_unseen, ring_colors. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/users/{userId}/stories"
+      }
+    },
+    "/{storyId}/view": {
+      "post": {
+        "tags": [
+          "Истории"
+        ],
+        "operationId": "op068_viewStory",
+        "summary": "viewStory",
+        "description": "Ответ игнорируется. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/story_api_service.dart",
+          "line": 205,
+          "address": "0xb50e2c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "storyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/{storyId}/view",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/like": {
+      "post": {
+        "tags": [
+          "Истории"
+        ],
+        "operationId": "op069_likeStory",
+        "summary": "likeStory",
+        "description": "Ответ игнорируется. Единственный вызов likeStory; отдельного unlikeStory в сервисе нет. Серверная семантика toggle не доказана разбором ответа.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/story_api_service.dart",
+          "line": 256,
+          "address": "0xbaa628"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/like",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "post_id": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stories/{storyId}/viewers": {
+      "get": {
+        "tags": [
+          "Истории"
+        ],
+        "operationId": "op071_getStoryViewers",
+        "summary": "getStoryViewers",
+        "description": "Page<StoryViewerDto>, список в data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/story_api_service.dart",
+          "line": 362,
+          "address": "0xcdbcb8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<StoryViewerDto>, список в data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "storyId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/stories/{storyId}/viewers"
+      }
+    },
+    "/stories/{postId}/view": {
+      "post": {
+        "tags": [
+          "Истории"
+        ],
+        "operationId": "op072_viewPost",
+        "summary": "viewPost",
+        "description": "Ответ не разбирается. Дополнительный legacy-вызов учёта просмотра, несмотря на имя viewPost.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/feed_service.dart",
+          "line": 929,
+          "address": "0xb6ecb8"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ не разбирается. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/stories/{postId}/view",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{postId}/comments": {
+      "get": {
+        "tags": [
+          "Комментарии"
+        ],
+        "operationId": "op073_fetchComments",
+        "summary": "fetchComments",
+        "description": "Page<CommentDto>; data либо comments. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/comment_api_client.dart",
+          "line": 317,
+          "address": "0xb5ca28"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<CommentDto>; data либо comments. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "postId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/{postId}/comments"
+      }
+    },
+    "/comments/{commentId}/replies": {
+      "get": {
+        "tags": [
+          "Комментарии"
+        ],
+        "operationId": "op074_fetchReplies",
+        "summary": "fetchReplies",
+        "description": "Page<CommentReplyDto>, data. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/comment_api_client.dart",
+          "line": 10,
+          "address": "0xb5a910"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Page<CommentReplyDto>, data. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/comments/{commentId}/replies"
+      }
+    },
+    "/comment": {
+      "post": {
+        "tags": [
+          "Комментарии"
+        ],
+        "operationId": "op075_createComment",
+        "summary": "createComment",
+        "description": "CommentDto createReply использует тот же маршрут и добавляет parent_comment_id. mentions — SelectedMention[].",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/comment_api_client.dart",
+          "line": 406,
+          "address": "0xbccb84"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: CommentDto HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/comment",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string"
+                  },
+                  "post_id": {
+                    "type": "integer"
+                  },
+                  "mentions": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/SelectedMention"
+                    }
+                  },
+                  "parent_comment_id": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{commentId}/like": {
+      "post": {
+        "tags": [
+          "Комментарии"
+        ],
+        "operationId": "op076_likeComment",
+        "summary": "likeComment",
+        "description": "CommentReactionDto: liked, likeCount. Отдельного HTTP DELETE для реакции в CommentApiClient нет. При отсутствии объекта ответа адаптер использует локальный fallback.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/comment_api_client.dart",
+          "line": 737,
+          "address": "0xbfde68"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: CommentReactionDto: liked, likeCount. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/comments/{commentId}/like"
+      }
+    },
+    "/comments/{commentId}": {
+      "delete": {
+        "tags": [
+          "Комментарии"
+        ],
+        "operationId": "op077_deleteComment",
+        "summary": "deleteComment",
+        "description": "Ответ игнорируется. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/comment_api_client.dart",
+          "line": 908,
+          "address": "0xbff39c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/comments/{commentId}"
+      }
+    },
+    "/comment/{commentId}/pin": {
+      "post": {
+        "tags": [
+          "Комментарии"
+        ],
+        "operationId": "op078_pinComment",
+        "summary": "pinComment",
+        "description": "Ответ игнорируется. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/comment_api_client.dart",
+          "line": 948,
+          "address": "0xbffa50"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/comment/{commentId}/pin"
+      }
+    },
+    "/comment/{commentId}/unpin": {
+      "post": {
+        "tags": [
+          "Комментарии"
+        ],
+        "operationId": "op079_unpinComment",
+        "summary": "unpinComment",
+        "description": "Ответ игнорируется. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/comment_api_client.dart",
+          "line": 990,
+          "address": "0xbffc28"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/comment/{commentId}/unpin"
+      }
+    },
+    "/notification-count": {
+      "get": {
+        "tags": [
+          "Уведомления"
+        ],
+        "operationId": "op080_fetchNotificationCount",
+        "summary": "fetchNotificationCount",
+        "description": "{count:number}; при null/ошибке разбора локальный fallback 0. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/notification_service.dart",
+          "line": 10,
+          "address": "0xab2094"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {count:number}; при null/ошибке разбора локальный fallback 0. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/notification-count"
+      }
+    },
+    "/notification": {
+      "get": {
+        "tags": [
+          "Уведомления"
+        ],
+        "operationId": "op081_fetchNotifications",
+        "summary": "fetchNotifications",
+        "description": "{data:NotificationDto[],meta:{pagination:PaginationMeta}} Старый HTTP-клиент. filter=all|reactions|comments|mentions|requests; pagination_size=15 в клиенте.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/notification_service.dart",
+          "line": 980,
+          "address": "0xb6b878"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {data:NotificationDto[],meta:{pagination:PaginationMeta}} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "pagination_size",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "reactions",
+                "comments",
+                "mentions",
+                "requests"
+              ]
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/notification"
+      }
+    },
+    "/notification/seen/{notificationId}": {
+      "post": {
+        "tags": [
+          "Уведомления"
+        ],
+        "operationId": "op082_viewNotification",
+        "summary": "viewNotification",
+        "description": "Ответ не разбирается. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/notification_service.dart",
+          "line": 2207,
+          "address": "0xc6c120"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ не разбирается. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notificationId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/notification/seen/{notificationId}",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fcm-token": {
+      "put": {
+        "tags": [
+          "Уведомления"
+        ],
+        "operationId": "op083_updateFcmToken",
+        "summary": "updateFcmToken",
+        "description": "Ответ не разбирается. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/services/notification_service.dart",
+          "line": 563,
+          "address": "0xacb4d0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ не разбирается. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/fcm-token",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fcm_token": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/subscription": {
+      "get": {
+        "tags": [
+          "Тарифы и квоты"
+        ],
+        "operationId": "op084_getStatus",
+        "summary": "getStatus",
+        "description": "SubscriptionStatusDto ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/subscription_api_client.dart",
+          "line": 291,
+          "address": "0x7fd5a0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: SubscriptionStatusDto HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/subscription"
+      }
+    },
+    "/v1/app/subscription/refresh": {
+      "post": {
+        "tags": [
+          "Тарифы и квоты"
+        ],
+        "operationId": "op085_refresh",
+        "summary": "refresh",
+        "description": "SubscriptionStatusDto Синхронизация статуса подписки после действий через магазин/RevenueCat; это не refresh JWT.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/subscription_api_client.dart",
+          "line": 345,
+          "address": "0xa8e1b4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: SubscriptionStatusDto HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/subscription/refresh"
+      }
+    },
+    "/v1/app/entitlements/quotas": {
+      "get": {
+        "tags": [
+          "Тарифы и квоты"
+        ],
+        "operationId": "op086_fetchQuotas",
+        "summary": "fetchQuotas",
+        "description": "UserQuotas: tier, quotas, features. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/entitlement_api_client.dart",
+          "line": 10,
+          "address": "0x7f6fc4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: UserQuotas: tier, quotas, features. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/entitlements/quotas"
+      }
+    },
+    "/v1/app/entitlements/tiers": {
+      "get": {
+        "tags": [
+          "Тарифы и квоты"
+        ],
+        "operationId": "op087_fetchTierLimits",
+        "summary": "fetchTierLimits",
+        "description": "TierLimitsMatrix: tiers, features. ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/entitlement_api_client.dart",
+          "line": 64,
+          "address": "0xadd574"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: TierLimitsMatrix: tiers, features. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/entitlements/tiers"
+      }
+    },
+    "/v1/app/msg/session": {
+      "post": {
+        "tags": [
+          "Сообщения"
+        ],
+        "operationId": "op088_fetchSessionPayload",
+        "summary": "fetchSessionPayload",
+        "description": "MatrixSessionPayloadDto deviceId — устойчивый локальный идентификатор устройства.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/matrix_api_service.dart",
+          "line": 81,
+          "address": "0xaaf4c0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MatrixSessionPayloadDto HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/msg/session",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceId": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/msg/session/rotate": {
+      "post": {
+        "tags": [
+          "Сообщения"
+        ],
+        "operationId": "op089_rotateSessionPayload",
+        "summary": "rotateSessionPayload",
+        "description": "MatrixSessionPayloadDto ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/matrix_api_service.dart",
+          "line": 10,
+          "address": "0xa9e57c"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: MatrixSessionPayloadDto HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/msg/session/rotate",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "previousDeviceId": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/app/msg/dm/{userId}": {
+      "post": {
+        "tags": [
+          "Сообщения"
+        ],
+        "operationId": "op090_createOrGetDmRoomId",
+        "summary": "createOrGetDmRoomId",
+        "description": "{roomId:string} Тело отсутствует. Тип ID и правила доступа берутся из профиля адресата; серверные проверки не видны в APK.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/matrix_api_service.dart",
+          "line": 218,
+          "address": "0xb39470"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: {roomId:string} HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/msg/dm/{userId}"
+      }
+    },
+    "/v1/app/msg/dm/{roomId}/peer": {
+      "get": {
+        "tags": [
+          "Сообщения"
+        ],
+        "operationId": "op091_getDmPeerProfile",
+        "summary": "getDmPeerProfile",
+        "description": "DmChatProfileDto roomId — Matrix room ID. В клиенте строковая интерполяция; при ручном запросе корректно кодируйте сегмент URI.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/matrix_api_service.dart",
+          "line": 151,
+          "address": "0xab89b0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: DmChatProfileDto HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "roomId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-client-path-template": "/v1/app/msg/dm/{roomId}/peer"
+      }
+    },
+    "/v1/app/link-preview": {
+      "get": {
+        "tags": [
+          "Сообщения"
+        ],
+        "operationId": "op092_fetchLinkPreview",
+        "summary": "fetchLinkPreview",
+        "description": "LinkPreview ",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/matrix_api_service.dart",
+          "line": 287,
+          "address": "0xc371bc"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: LinkPreview HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Передаётся клиентом; серверная обязательность/границы не установлены."
+          }
+        ],
+        "x-client-path-template": "/v1/app/link-preview"
+      }
+    },
+    "/v1/app/msg/encryption/reset": {
+      "post": {
+        "tags": [
+          "Сообщения"
+        ],
+        "operationId": "op093_resetEncryption",
+        "summary": "resetEncryption",
+        "description": "Ответ игнорируется. Сброс E2EE; это отдельная изменяющая состояние операция, не штатный способ чтения сообщений.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/matrix_api_service.dart",
+          "line": 396,
+          "address": "0xc7fdf0"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/v1/app/msg/encryption/reset"
+      }
+    },
+    "/reports": {
+      "post": {
+        "tags": [
+          "Жалобы"
+        ],
+        "operationId": "op094_submitReport",
+        "summary": "submitReport",
+        "description": "Ответ игнорируется; DUPLICATE_REPORT обрабатывается отдельно. Варианты цели формируются SubmitReportPayload; не следует одновременно добавлять обе цели без проверки.",
+        "x-evidence": {
+          "source": "dart/asm/monnet/data/data_sources/remote/reporting_api_client.dart",
+          "line": 10,
+          "address": "0xcd70a4"
+        },
+        "responses": {
+          "default": {
+            "description": "Наблюдаемый клиентом результат: Ответ игнорируется; DUPLICATE_REPORT обрабатывается отдельно. HTTP-коды для этого endpoint не перечислены без сетевой проверки."
+          }
+        },
+        "parameters": [],
+        "x-client-path-template": "/reports",
+        "requestBody": {
+          "description": "Поля восстановлены из клиента; required на стороне сервера не доказаны.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "integer"
+                  },
+                  "post_id": {
+                    "type": "integer"
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SelectedMention": {
+        "type": "object",
+        "properties": {
+          "user_public_id": {
+            "type": "string"
+          },
+          "start": {
+            "type": "integer"
+          },
+          "end": {
+            "type": "integer"
+          }
+        },
+        "additionalProperties": true
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "zip": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ProfileUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string"
+          },
+          "is_public": {
+            "type": "boolean"
+          },
+          "posts_mature_content": {
+            "type": "boolean"
+          },
+          "play_mature_content": {
+            "type": "boolean"
+          },
+          "restrict_messages": {
+            "type": "boolean"
+          },
+          "profile_picture_id": {},
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Location"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "avatar_ring_color": {}
+        },
+        "additionalProperties": true
+      },
+      "PostCreate": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "category_id": {
+            "type": "integer"
+          },
+          "tagged_users": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "mentions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelectedMention"
+            }
+          },
+          "media_count": {
+            "type": "integer"
+          },
+          "post_type": {
+            "type": "string",
+            "enum": [
+              "media",
+              "story",
+              "text"
+            ]
+          }
+        },
+        "additionalProperties": true
+      },
+      "PostUpdate": {
+        "type": "object",
+        "properties": {
+          "public_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "clear_location": {
+            "type": "boolean"
+          },
+          "category_id": {
+            "type": "integer"
+          },
+          "clear_category": {
+            "type": "boolean"
+          },
+          "tagged_users": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "mentions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SelectedMention"
+            }
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "media_id": {}
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "JWT Monnett; не Matrix accessToken"
+      }
+    }
+  }
+}

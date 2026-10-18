@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Monnett
+Comment=Independent Monnett desktop client
+Exec=monnett-qt
+Icon=social.monnett.MonnettQt
+Categories=Network;InstantMessaging;
+StartupWMClass=monnett-qt
+Terminal=false
