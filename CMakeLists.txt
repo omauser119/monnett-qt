@@ -14,7 +14,7 @@ add_library(monnett_core STATIC src/json.cpp src/accounts.cpp src/api.cpp src/ca
 target_include_directories(monnett_core PUBLIC src)
 target_link_libraries(monnett_core PUBLIC Qt6::Core Qt6::Gui Qt6::Network PkgConfig::SECRET)
 target_compile_options(monnett_core PRIVATE -Wall -Wextra -Wpedantic)
-add_executable(monnett-qt src/main.cpp src/window.cpp src/widgets.cpp src/authdialog.cpp src/operationpanel.cpp src/messages.cpp resources/resources.qrc)
+add_executable(monnett-qt src/main.cpp src/window.cpp src/widgets.cpp src/authdialog.cpp src/operationpanel.cpp src/messages.cpp src/panels.cpp resources/resources.qrc)
 target_link_libraries(monnett-qt PRIVATE monnett_core Qt6::Widgets Qt6::Multimedia Qt6::MultimediaWidgets QuotientQt6)
 target_compile_options(monnett-qt PRIVATE -Wall -Wextra -Wpedantic)
 install(TARGETS monnett-qt RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
